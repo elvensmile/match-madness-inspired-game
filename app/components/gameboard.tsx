@@ -55,6 +55,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ words }) => {
    * are unique and provides efficient operations for adding and checking the presence of indices **/
   const [matchedIndices, setMatchedIndices] = useState<Set<number>>(new Set());
 
+  // Effect to shuffle the words and start the timer when the component mounts
   useEffect(() => {
     const pairs = words.flatMap(({ id, word, translation }) => [
       { id, content: word, type: "word" },

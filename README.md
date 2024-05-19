@@ -1,36 +1,37 @@
-# Welcome to Remix + Vite!
+# Matching Madness Inspired Game
 
-📖 See the [Remix docs](https://remix.run/docs) and the [Remix Vite docs](https://remix.run/docs/en/main/guides/vite) for details on supported features.
+Matching Madness is a vocabulary learning game powered by Remix.js. Users can create word sets, manage their vocabulary, and play a matching game to practice their words and translations.
+The main goal of this project for me was to try remix, to try tailwind and to try to make rough MVP in the shortest time.
 
-## Development
+## Features
 
-Run the Vite dev server:
+- Create and manage word sets
+- Add, update, and delete words and translations
+- Play a matching game with a timer
+- Responsive and visually appealing UI
+- Built with Remix.js, Tailwind CSS, IndexedDb
 
-```shellscript
-npm run dev
-```
+## Project Structure
 
-## Deployment
+- `app/`: Contains the main application components and routes
+    - `components/`: Reusable React components
+    - `routes/`: Remix.js routes for different pages
+    - `db/`: Database utility functions
+- `public/`: Static assets (e.g., images, fonts)
+- `README.md`: Project documentation
 
-First, build your app for production:
+## To-Do List
 
-```sh
-npm run build
-```
+- [x] Implement basic word set management (CRUD operations) with IndexedDB
+- [x] Create the matching game interface
+- [x] Add timer functionality to the game
+- [x] Implement game over and win conditions
+- [x] Style the application with Tailwind CSS (and not happy with that)
+- [ ] integrate some proper state management system, get rid of many setStates
+- [ ] Rewrite from Tailwind CSS
+- [ ] Migrate from indexeddb to some real database
+- [ ] Add user authentication
+- [ ] Save game progress and user statistics
+- [ ] Add more customization options for the game
+- [ ] Write tests
 
-Then run the app in production mode:
-
-```sh
-npm start
-```
-
-Now you'll need to pick a host to deploy it to.
-
-### DIY
-
-If you're familiar with deploying Node applications, the built-in Remix app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-- `build/server`
-- `build/client`
