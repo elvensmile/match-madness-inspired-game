@@ -3,6 +3,10 @@
 Matching Madness is a vocabulary learning game powered by Remix.js. Users can create word sets, manage their vocabulary, and play a matching game to practice their words and translations.
 The main goal of this project for me was to try remix, to try tailwind and to try to make rough MVP in the shortest time.
 
+## Check LIVE 
+
+[Live Version](https://match-madness-inspired-game-4f96.vercel.app)
+
 ## Features
 
 - Create and manage word sets
