@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Card from "./card";
 import { Word } from "~/db/utils";
-import { Link } from "@remix-run/react";
 
 const shuffleArray = (array: any[]) => array.sort(() => Math.random() - 0.5);
 
@@ -23,12 +22,9 @@ const GameEndOverlay: React.FC<GameEndOverlayProps> = ({
       >
         Play Again
       </button>
-      <Link
-        to={"/"}
-        className="hover:text-blue-300 transition-colors px-3 py-2"
-      >
+      <a href="/" className="hover:text-blue-300 transition-colors px-3 py-2">
         or Practice another set
-      </Link>
+      </a>
     </div>
   </div>
 );
@@ -39,15 +35,15 @@ interface GameBoardProps {
 
 const GameBoard: React.FC<GameBoardProps> = ({ words }) => {
   const [shuffledPairs, setShuffledPairs] = useState<
-    { id: number; content: string; type: string }[]
+    { id: string; content: string; type: string }[]
   >([]);
   const [selectedWords, setSelectedWords] = useState<
-    { content: string; index: number }[]
+    { content: string; index: number; id: string }[]
   >([]);
-  const [matches, setMatches] = useState<number>(0);
   const [timer, setTimer] = useState<number>(60);
-  const [gameOver, setGameOver] = useState<boolean>(false);
-  const [gameWon, setGameWon] = useState<boolean>(false);
+  const [gameState, setGameState] = useState<
+    "in-progress" | "game-over-lost" | "game-over-win"
+  >("in-progress");
   const [incorrect, setIncorrect] = useState<boolean>(false);
   const [correct, setCorrect] = useState<boolean>(false);
   /** State to keep track of the indices of matched cards
@@ -67,7 +63,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ words }) => {
     const interval = setInterval(() => {
       setTimer((prevTimer) => {
         if (prevTimer <= 1) {
-          setGameOver(true);
+          setGameState("game-over-lost");
           clearInterval(interval);
           return 0;
         }
@@ -78,24 +74,26 @@ const GameBoard: React.FC<GameBoardProps> = ({ words }) => {
     return () => clearInterval(interval);
   }, [words]);
 
+  useEffect(() => {
+    if (matchedIndices.size / 2 === words.length) {
+      setGameState("game-over-win");
+    }
+    if (gameState !== "in-progress") {
+      setTimer(0);
+    }
+  }, [gameState, matchedIndices]);
+
   const checkMatch = useCallback(() => {
     const [first, second] = selectedWords;
-    if (shuffledPairs[first.index].id === shuffledPairs[second.index].id) {
-      setMatches((prevMatches) => {
-        const newMatches = prevMatches + 1;
-        setMatchedIndices(
-          (prevIndices) => new Set([...prevIndices, first.index, second.index]),
-        );
-        setCorrect(true);
-        setTimeout(() => {
-          setCorrect(false);
-          setSelectedWords([]);
-          if (newMatches === words.length) {
-            setGameWon(true);
-          }
-        }, 500);
-        return newMatches;
-      });
+    if (first.id === second.id) {
+      setMatchedIndices(
+        (prevIndices) => new Set([...prevIndices, first.index, second.index]),
+      );
+      setCorrect(true);
+      setTimeout(() => {
+        setCorrect(false);
+        setSelectedWords([]);
+      }, 500);
     } else {
       setIncorrect(true);
       setTimeout(() => {
@@ -111,13 +109,16 @@ const GameBoard: React.FC<GameBoardProps> = ({ words }) => {
     }
   }, [selectedWords, checkMatch]);
 
-  const handleWordClick = (content: string, index: number) => {
+  const handleWordClick = (content: string, index: number, id: string) => {
     if (
-      !gameOver &&
+      gameState === "in-progress" &&
       selectedWords.length < 2 &&
       !selectedWords.some((selected) => selected.index === index)
     ) {
-      setSelectedWords((prevSelected) => [...prevSelected, { content, index }]);
+      setSelectedWords((prevSelected) => [
+        ...prevSelected,
+        { content, index, id },
+      ]);
     }
   };
 
@@ -156,13 +157,15 @@ const GameBoard: React.FC<GameBoardProps> = ({ words }) => {
               </div>
               <div className="text-right">
                 <span className="text-xs font-semibold inline-block text-pink-600">
-                  {matches}/{words.length}
+                  {matchedIndices.size / 2}/{words.length}
                 </span>
               </div>
             </div>
             <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-pink-200">
               <div
-                style={{ width: `${(matches / words.length) * 100}%` }}
+                style={{
+                  width: `${(matchedIndices.size / 2 / words.length) * 100}%`,
+                }}
                 className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-pink-500"
               ></div>
             </div>
@@ -172,19 +175,19 @@ const GameBoard: React.FC<GameBoardProps> = ({ words }) => {
       <div className="grid grid-cols-4 gap-4">
         {shuffledPairs.map((item, index) => (
           <Card
-            id={String(index)}
+            id={item.id}
             key={`${item.id}_${item.type}`}
             content={item.content}
-            onClick={() => handleWordClick(item.content, index)}
+            onClick={() => handleWordClick(item.content, index, item.id)}
             additionalCn={getButtonClass(index)}
           />
         ))}
       </div>
       <div className="text-center mt-8">
         <h2 className="text-2xl">{`Time Left: ${timer}s`}</h2>
-        {(gameOver || gameWon) && (
+        {gameState !== "in-progress" && (
           <GameEndOverlay
-            message={gameOver ? "Game Over!" : "You Win!"}
+            message={gameState === "game-over-lost" ? "Game Over!" : "You Win!"}
             onPlayAgain={handlePlayAgain}
           />
         )}
